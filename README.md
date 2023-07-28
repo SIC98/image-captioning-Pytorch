@@ -1,4 +1,4 @@
-# kakao-image-generator
+# image-captioning-Pytorch
 ## Installation
 ```bash
 pip install -r requirements.txt
