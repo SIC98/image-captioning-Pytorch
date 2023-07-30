@@ -9,7 +9,15 @@ from models.models import EncoderDecoder
 
 pl.seed_everything(42)
 
-model = EncoderDecoder()
+model = EncoderDecoder(
+    attention_dim=512,
+    embed_dim=512,
+    decoder_dim=512,
+    vocab_size=12982,
+    encoder_dim=2048,
+    dropout=0.5
+)
+
 lightningmodule = LightningModule(model=model)
 
 datamodule = COCODataModule()
