@@ -222,10 +222,8 @@ class DecoderWithAttention(nn.Module):
 
         # Embedding
         # (batch_size, max_caption_length, embed_dim)
-        print(encoded_captions.shape)
         embeddings = self.embedding(encoded_captions)
 
-        print(encoder_out.shape)
         # Initialize LSTM state
         h, c = self.init_hidden_state(encoder_out)  # (batch_size, decoder_dim)
 
