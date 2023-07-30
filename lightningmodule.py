@@ -80,7 +80,9 @@ class LightningModule(pl.LightningModule):
     def on_before_batch_transfer(self, batch, dataloader_idx):
         img, text = batch
 
-        tokenized_text, caplens = encode_texts(text[0], self.word_map)
+        text = [t[0] for t in text]
+
+        tokenized_text, caplens = encode_texts(text, self.word_map)
 
         return img, torch.tensor(tokenized_text, device=self.device), torch.tensor(caplens, device=self.device)
 
