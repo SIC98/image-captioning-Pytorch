@@ -21,11 +21,11 @@ class LightningModule(pl.LightningModule):
         with open('wordmap.json', 'r') as j:
             self.word_map = json.load(j)
 
-    def training_step(self, batch, batch_idx, optimizer_idx):
-        img, text = batch
+    def training_step(self, batch, batch_idx):  # optimizer_idx
+        img, text, caplens = batch
 
         scores, caps_sorted, decode_lengths, alphas, sort_ind = self.model(
-            img, text, caplens=100  # Todo
+            img, text, caplens
         )
 
         # Since we decoded starting with <start>, the targets are all words after <start>, up to <end>
@@ -53,9 +53,10 @@ class LightningModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         self.model.eval()  # eval mode (no dropout or batchnorm)
 
-        img, text = batch
+        img, text, caplens = batch
+
         scores, caps_sorted, decode_lengths, alphas, sort_ind = self.model(
-            img, text, caplens=100  # Todo
+            img, text, caplens
         )
 
         targets = caps_sorted[:, 1:]
@@ -79,9 +80,9 @@ class LightningModule(pl.LightningModule):
     def on_before_batch_transfer(self, batch, dataloader_idx):
         img, text = batch
 
-        tokenized_text = encode_texts(text[0], self.word_map)
+        tokenized_text, caplens = encode_texts(text[0], self.word_map)
 
-        return img, tokenized_text
+        return img, torch.tensor(tokenized_text, device=self.device), torch.tensor(caplens, device=self.device)
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
