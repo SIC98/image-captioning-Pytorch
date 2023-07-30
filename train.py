@@ -6,6 +6,8 @@ from datamodules import COCODataModule
 from lightningmodule import LightningModule
 from models.models import EncoderDecoder
 
+from loggers import OutputLogger
+
 
 pl.seed_everything(42)
 
@@ -35,6 +37,7 @@ trainer = pl.Trainer(
             save_top_k=1,
         ),
         LearningRateMonitor(logging_interval='step'),
+        OutputLogger(),
     ],
     max_epochs=10,
 )
