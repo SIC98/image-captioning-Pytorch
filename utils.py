@@ -1,3 +1,6 @@
+import torch
+
+
 def encode_texts(texts, word_map):
     # Encoding texts
     encoded_texts = [encode_text(text, word_map) for text in texts]
@@ -27,3 +30,18 @@ def encode_text(text, word_map):
         words_encoded + [word_map['<end>']]
 
     return words_encoded
+
+
+def collate_fn(samples):
+    images, captions = zip(*samples)
+
+    images = torch.stack(images, 0)
+
+    max_length = max(len(c) for c in captions)
+    padded_captions = []
+    for c in captions:
+        if len(c) < max_length:
+            c += [''] * (max_length - len(c))
+        padded_captions.append(c)
+
+    return images, padded_captions
