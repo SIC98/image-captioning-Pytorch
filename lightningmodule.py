@@ -5,6 +5,8 @@ import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence
 import json
 
+from utils import encode_texts
+
 
 class LightningModule(pl.LightningModule):
     def __init__(
@@ -76,9 +78,8 @@ class LightningModule(pl.LightningModule):
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
         img, text = batch
-        tokenized_text = []
-        for sentence in text:
-            tokenized_text.append([self.word_map[word] for word in sentence])
+
+        tokenized_text = encode_texts(text[0], self.word_map)
 
         return img, tokenized_text
 
