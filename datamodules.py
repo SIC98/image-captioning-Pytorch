@@ -3,12 +3,14 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import json
 
+from utils import collate_fn
+
 
 class COCODataModule(LightningDataModule):
     def __init__(self):
         super().__init__()
-        self.train_batch_size = 16
-        self.valid_batch_size = 16
+        self.train_batch_size = 32
+        self.valid_batch_size = 32
         self.num_workers = 4
         self.shuffle = True
 
@@ -47,6 +49,7 @@ class COCODataModule(LightningDataModule):
             drop_last=True,
             num_workers=self.num_workers,
             shuffle=self.shuffle,
+            collate_fn=collate_fn
         )
 
     def val_dataloader(self):
@@ -56,6 +59,7 @@ class COCODataModule(LightningDataModule):
             drop_last=False,
             num_workers=self.num_workers,
             shuffle=self.shuffle,
+            collate_fn=collate_fn
         )
 
 
