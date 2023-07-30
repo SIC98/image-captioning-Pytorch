@@ -235,9 +235,9 @@ class DecoderWithAttention(nn.Module):
 
         # Create tensors to hold word predicion scores and alphas
         predictions = torch.zeros(batch_size, max(
-            decode_lengths), vocab_size)  # .to(device)
+            decode_lengths), vocab_size).to('cuda')  # .to(device) # Todo
         alphas = torch.zeros(batch_size, max(
-            decode_lengths), num_pixels)  # .to(device)
+            decode_lengths), num_pixels).to('cuda')  # .to(device)
 
         # At each time-step, decode by
         # attention-weighing the encoder's output based on the decoder's previous hidden state output
