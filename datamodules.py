@@ -1,6 +1,7 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+import json
 
 
 class COCODataModule(LightningDataModule):
@@ -10,6 +11,9 @@ class COCODataModule(LightningDataModule):
         self.valid_batch_size = 16
         self.num_workers = 4
         self.shuffle = True
+
+        with open('wordmap.json', 'r') as j:
+            self.word_map = json.load(j)
 
         transform = transforms.Compose([
             transforms.Resize((256, 256)),
@@ -47,10 +51,11 @@ class COCODataModule(LightningDataModule):
 
     def val_dataloader(self):
         return DataLoader(
-            dataset=self.val_dataloader,
+            dataset=self.val_dataset,
             batch_size=self.valid_batch_size,
             drop_last=False,
             num_workers=self.num_workers,
+            shuffle=self.shuffle,
         )
 
 
