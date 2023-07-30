@@ -3,9 +3,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence
+from nltk.translate.bleu_score import corpus_bleu
 import json
 
-from utils import encode_texts
+from utils import encode_texts, encode_texts_2d
 
 
 class LightningModule(pl.LightningModule):
@@ -15,6 +16,7 @@ class LightningModule(pl.LightningModule):
     ):
         super().__init__()
         self.model = model
+        self.validation_step_outputs = []
 
         self.loss = nn.CrossEntropyLoss()
 
@@ -22,10 +24,10 @@ class LightningModule(pl.LightningModule):
             self.word_map = json.load(j)
 
     def training_step(self, batch, batch_idx):  # optimizer_idx
-        img, text, caplens = batch
+        img, cap, allcaps, caplens = batch
 
         scores, caps_sorted, decode_lengths, alphas, sort_ind = self.model(
-            img, text, caplens
+            img, cap, caplens
         )
 
         # Since we decoded starting with <start>, the targets are all words after <start>, up to <end>
@@ -51,16 +53,17 @@ class LightningModule(pl.LightningModule):
         }
 
     def validation_step(self, batch, batch_idx):
-        self.model.eval()  # eval mode (no dropout or batchnorm)
+        self.model.eval()
 
-        img, text, caplens = batch
+        img, cap, allcaps, caplens = batch
 
         scores, caps_sorted, decode_lengths, alphas, sort_ind = self.model(
-            img, text, caplens
+            img, cap, caplens
         )
 
         targets = caps_sorted[:, 1:]
 
+        scores_copy = scores.clone()
         scores = pack_padded_sequence(
             scores, decode_lengths, batch_first=True).data
         targets = pack_padded_sequence(
@@ -73,18 +76,69 @@ class LightningModule(pl.LightningModule):
         # Add doubly stochastic attention regularization
         loss += alpha_c * ((1. - alphas.sum(dim=1)) ** 2).mean()
 
-        return {
+        references = list()
+        hypotheses = list()
+
+        # References
+        allcaps = allcaps[sort_ind]
+        for j in range(allcaps.shape[0]):
+            img_caps = allcaps[j].tolist()
+            img_captions = list(
+                map(lambda c: [w for w in c if w not in {self.word_map['<start>'], self.word_map['<pad>']}],
+                    img_caps))  # remove <start> and pads
+            references.append(img_captions)
+
+        # Hypotheses
+        _, preds = torch.max(scores_copy, dim=2)
+        preds = preds.tolist()
+        temp_preds = list()
+        for j, p in enumerate(preds):
+            temp_preds.append(preds[j][:decode_lengths[j]])  # remove pads
+        preds = temp_preds
+        hypotheses.extend(preds)
+
+        assert len(references) == len(hypotheses)
+
+        result = {
             'loss': loss,
+            'references': references,
+            'hypotheses': hypotheses
+        }
+
+        self.validation_step_outputs.append(result)
+
+        return result
+
+    def on_validation_epoch_end(self):
+        references = list()
+        hypotheses = list()
+        loss = []
+
+        for output in self.validation_step_outputs:
+            references.extend(output['references'])
+            hypotheses.extend(output['hypotheses'])
+            loss.append(output['loss'])
+
+        bleu4 = corpus_bleu(references, hypotheses)
+
+        print("results:", bleu4, sum(loss) / len(loss))
+
+        self.validation_step_outputs.clear()
+
+        return {
+            'bleu4': bleu4,
+            'loss': sum(loss) / len(loss)
         }
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
-        img, text = batch
+        img, allcaps = batch
 
-        text = [t[0] for t in text]
+        cap = [c[0] for c in allcaps]
 
-        tokenized_text, caplens = encode_texts(text, self.word_map)
+        tokenized_cap, caplens = encode_texts(cap, self.word_map)
+        tokenized_allcaps = encode_texts_2d(allcaps, self.word_map)
 
-        return img, torch.tensor(tokenized_text, device=self.device), torch.tensor(caplens, device=self.device)
+        return img, torch.tensor(tokenized_cap, device=self.device), torch.tensor(tokenized_allcaps, device=self.device), torch.tensor(caplens, device=self.device)
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
