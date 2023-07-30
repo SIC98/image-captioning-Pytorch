@@ -26,11 +26,6 @@ class COCODataModule(LightningDataModule):
             transform=transform
         )
 
-        img, target = self.train_dataset[0]
-
-        print("Image Size: ", img.size())
-        print(target)
-
         self.val_dataset = datasets.CocoCaptions(
             root='coco2017/val2017',
             annFile='coco2017/annotations/captions_val2017.json',
@@ -63,7 +58,9 @@ if __name__ == '__main__':
     datamodule = COCODataModule()
     dataloader = datamodule.train_dataloader()
     print(dataloader)
-    for img, target in dataloader:
+    for img, text in dataloader:
+        # torch.Size([16, 3, 256, 256])
         print(img.shape)
-        print(len(target), len(target[0]), target[0][0])
+        # 5 16 two cats sitting on a lounge chair arm looking out a window
+        print(len(text), len(text[0]), text[0][0])
         break
