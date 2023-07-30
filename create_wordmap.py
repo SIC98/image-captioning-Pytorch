@@ -22,6 +22,7 @@ for data in dataset:
         for text in texts:
             word_freq.update(text.lower().split())
 
+# Total words: 44920
 print('Total words:', len(word_freq.keys()))
 
 words = [w for w in word_freq.keys() if word_freq[w] > 5]
@@ -32,6 +33,7 @@ word_map['<start>'] = len(word_map) + 1
 word_map['<end>'] = len(word_map) + 1
 word_map['<pad>'] = 0
 
+# Total tokens: 12982
 print('Total tokens:', len(word_map))
 
 with open(os.path.join('wordmap.json'), 'w') as j:
