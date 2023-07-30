@@ -2,7 +2,25 @@ import torch
 from torch import nn
 import torchvision
 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+class EncoderDecoder(nn.Module):
+
+    def __init__(self, attention_dim, embed_dim, decoder_dim, vocab_size, encoder_dim, dropout):
+        super().__init__()
+
+        self.encoder = Encoder()
+        self.decoder = DecoderWithAttention(
+            attention_dim, embed_dim, decoder_dim, vocab_size, encoder_dim, dropout
+        )
+
+    def forward(self, img, text, caplens):
+        encoded_img = self.encoder(img)
+
+        scores, caps_sorted, decode_lengths, alphas, sort_ind = self.decoder(
+            encoded_img, text, caplens
+        )
+
+        return scores, caps_sorted, decode_lengths, alphas, sort_ind
 
 
 class Encoder(nn.Module):
@@ -122,7 +140,8 @@ class DecoderWithAttention(nn.Module):
         self.dropout = dropout
 
         self.attention = Attention(
-            encoder_dim, decoder_dim, attention_dim)  # attention network
+            encoder_dim, decoder_dim, attention_dim
+        )  # attention network
 
         self.embedding = nn.Embedding(vocab_size, embed_dim)  # embedding layer
         self.dropout = nn.Dropout(p=self.dropout)
@@ -246,7 +265,7 @@ if __name__ == "__main__":
     from PIL import Image
     import requests
 
-    url = "https://huggingface.co/datasets/sayakpaul/sample-datasets/resolve/main/pokemon.png"
+    url = 'https://huggingface.co/datasets/sayakpaul/sample-datasets/resolve/main/pokemon.png'
     image = Image.open(requests.get(url, stream=True).raw)
     image
 
