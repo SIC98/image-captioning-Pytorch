@@ -1,6 +1,22 @@
 import torch
 
 
+def encode_texts_2d(texts_2d, word_map):
+    # Flatten the list of lists and encode texts
+    encoded_texts = [encode_texts(texts, word_map)[0] for texts in texts_2d]
+
+    # Finding the maximum length
+    max_len = max(len(text) for sublist in encoded_texts for text in sublist)
+
+    # Padding
+    for sublist in encoded_texts:
+        for text in sublist:
+            if len(text) < max_len:
+                text += [word_map['<pad>']] * (max_len - len(text))
+
+    return encoded_texts
+
+
 def encode_texts(texts, word_map):
     # Encoding texts
     encoded_texts = [encode_text(text, word_map) for text in texts]
