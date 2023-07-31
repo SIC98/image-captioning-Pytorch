@@ -18,7 +18,7 @@ class COCODataModule(LightningDataModule):
             self.word_map = json.load(j)
 
         transform = transforms.Compose([
-            transforms.Resize((256, 256)),
+            transforms.Resize((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=[0.485, 0.456, 0.406],
