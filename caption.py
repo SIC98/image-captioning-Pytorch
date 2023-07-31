@@ -179,7 +179,7 @@ if __name__ == '__main__':
     )
 
     checkpoint = torch.load(
-        'wandb/run-20230731_114904-7twg4vj4/files/epoch=2-step=22176.ckpt'
+        'wandb/run-20230731_114904-7twg4vj4/files/epoch=5-step=44352.ckpt'
     )
 
     new_state_dict = OrderedDict()
@@ -201,7 +201,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Show, Attend, and Tell - Tutorial - Generate Caption')
 
-    parser.add_argument('--img', '-i', help='path to image')
+    parser.add_argument(
+        '--img', '-i', default='images/51232785.jpeg', help='path to image')
     # parser.add_argument('--model', '-m', help='path to model')
     # parser.add_argument('--word_map', '-wm', help='path to word map JSON')
     parser.add_argument('--beam_size', '-b', default=5,
