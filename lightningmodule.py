@@ -17,6 +17,7 @@ class LightningModule(pl.LightningModule):
     ):
         super().__init__()
         self.model = model
+        self.automatic_optimization = False
         self.validation_step_outputs = []
 
         self.loss = nn.CrossEntropyLoss()
@@ -25,6 +26,10 @@ class LightningModule(pl.LightningModule):
             self.word_map = json.load(j)
 
     def training_step(self, batch, batch_idx):  # optimizer_idx
+        encoder_opt, decoder_opt = self.optimizers()
+        encoder_opt.zero_grad()
+        decoder_opt.zero_grad()
+
         img, cap, allcaps, caplens = batch
 
         scores, caps_sorted, decode_lengths, alphas, sort_ind = self.model(
@@ -48,6 +53,10 @@ class LightningModule(pl.LightningModule):
 
         # Add doubly stochastic attention regularization
         loss += alpha_c * ((1. - alphas.sum(dim=1)) ** 2).mean()
+
+        self.manual_backward(loss)
+        encoder_opt.step()
+        decoder_opt.step()
 
         return {
             'loss': loss,
@@ -146,17 +155,12 @@ class LightningModule(pl.LightningModule):
         return img, torch.tensor(tokenized_cap, device=self.device), torch.tensor(tokenized_allcaps, device=self.device), torch.tensor(caplens, device=self.device)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(
-            params=self.model.parameters(),
+        encoder_optimizer = torch.optim.AdamW(
+            params=self.model.encoder.parameters(),
             lr=1e-4,
         )
-        return optimizer
-        # encoder_optimizer = torch.optim.AdamW(
-        #     params=self.model.encoder.parameters(),
-        #     lr=1e-4,
-        # )
-        # decoder_optimizer = torch.optim.AdamW(
-        #     params=self.model.decoder.parameters(),
-        #     lr=4e-4,
-        # )
-        # return [encoder_optimizer, decoder_optimizer]
+        decoder_optimizer = torch.optim.AdamW(
+            params=self.model.decoder.parameters(),
+            lr=4e-4,
+        )
+        return [encoder_optimizer, decoder_optimizer]
