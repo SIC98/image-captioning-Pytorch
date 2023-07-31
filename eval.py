@@ -106,7 +106,7 @@ def evaluate(beam_size):
 
     loader = DataLoader(
         dataset=dataset,
-        batch_size=17,
+        batch_size=1,
         drop_last=False,
         num_workers=4,
         shuffle=False,
@@ -222,7 +222,6 @@ def evaluate(beam_size):
             # Which sequences are incomplete (didn't reach <end>)?
             incomplete_inds = [ind for ind, next_word in enumerate(next_word_inds) if
                                next_word != word_map['<end>']]
-            # print('incomplete_inds', incomplete_inds)
             complete_inds = list(
                 set(range(len(next_word_inds))) - set(incomplete_inds))
 
@@ -247,22 +246,22 @@ def evaluate(beam_size):
                 break
             step += 1
 
-        # print(complete_seqs_scores)
-        i = complete_seqs_scores.index(max(complete_seqs_scores))
-        seq = complete_seqs[i]
+        if complete_seqs_scores != []:
+            i = complete_seqs_scores.index(max(complete_seqs_scores))
+            seq = complete_seqs[i]
 
-        # References
-        img_caps = allcaps[0].tolist()
-        img_captions = list(
-            map(lambda c: [w for w in c if w not in {word_map['<start>'], word_map['<end>'], word_map['<pad>']}],
-                img_caps))  # remove <start> and pads
-        references.append(img_captions)
+            # References
+            img_caps = allcaps[0].tolist()
+            img_captions = list(
+                map(lambda c: [w for w in c if w not in {word_map['<start>'], word_map['<end>'], word_map['<pad>']}],
+                    img_caps))  # remove <start> and pads
+            references.append(img_captions)
 
-        # Hypotheses
-        hypotheses.append([w for w in seq if w not in {
-                          word_map['<start>'], word_map['<end>'], word_map['<pad>']}])
+            # Hypotheses
+            hypotheses.append([w for w in seq if w not in {
+                word_map['<start>'], word_map['<end>'], word_map['<pad>']}])
 
-        assert len(references) == len(hypotheses)
+            assert len(references) == len(hypotheses)
 
     # Calculate BLEU-4 scores
     bleu4 = corpus_bleu(references, hypotheses)
@@ -271,5 +270,5 @@ def evaluate(beam_size):
 
 
 if __name__ == '__main__':
-    beam_size = 2
+    beam_size = 5
     print(f"BLEU-4 score @ beam size of {beam_size} is {evaluate(beam_size)}")
