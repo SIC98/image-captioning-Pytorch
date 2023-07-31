@@ -7,6 +7,7 @@ from lightningmodule import LightningModule
 from models.models import EncoderDecoder
 
 from loggers import OutputLogger
+import wandb
 
 
 pl.seed_everything(42)
@@ -32,9 +33,8 @@ trainer = pl.Trainer(
     ],
     callbacks=[
         ModelCheckpoint(
-            monitor='valid_loss',
-            save_last=True,
-            save_top_k=1,
+            dirpath=wandb.run.dir,
+            save_top_k=-1,
         ),
         LearningRateMonitor(logging_interval='step'),
         OutputLogger(),
