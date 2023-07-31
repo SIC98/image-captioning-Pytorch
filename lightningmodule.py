@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence
 from nltk.translate.bleu_score import corpus_bleu
 import json
+import wandb
 
 from utils import encode_texts, encode_texts_2d
 
@@ -107,7 +108,9 @@ class LightningModule(pl.LightningModule):
 
         self.validation_step_outputs.append(result)
 
-        return result
+        return {
+            'loss': loss
+        }
 
     def on_validation_epoch_end(self):
         references = list()
@@ -122,6 +125,8 @@ class LightningModule(pl.LightningModule):
         bleu4 = corpus_bleu(references, hypotheses)
 
         print("results:", bleu4, sum(loss) / len(loss))
+
+        wandb.log({'Bleu4': bleu4})
 
         self.validation_step_outputs.clear()
 
