@@ -1,6 +1,7 @@
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
+from transformers import GPT2Tokenizer, GPT2Model
 
 from datamodules import COCODataModule
 from lightningmodule import LightningModule
@@ -20,6 +21,10 @@ model = EncoderDecoder(
     encoder_dim=2048,
     dropout=0.5
 )
+
+gpt2 = GPT2Model.from_pretrained('gpt2')
+model.load_pretrained_embeddings(gpt2.wte)
+del gpt2
 
 lightningmodule = LightningModule(model=model)
 

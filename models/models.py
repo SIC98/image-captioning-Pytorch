@@ -172,7 +172,7 @@ class DecoderWithAttention(nn.Module):
 
         :param embeddings: pre-trained embeddings
         """
-        self.embedding.weight = nn.Parameter(embeddings)
+        self.embedding = embeddings
 
     def fine_tune_embeddings(self, fine_tune=True):
         """
