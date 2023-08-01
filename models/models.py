@@ -32,7 +32,7 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.enc_image_size = encoded_image_size
 
-        resnet = torchvision.models.resnet101(
+        resnet = torchvision.models.resnet152(
             pretrained=True
         )  # pretrained ImageNet ResNet-101
 
