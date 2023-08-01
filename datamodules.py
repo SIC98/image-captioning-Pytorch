@@ -14,9 +14,6 @@ class COCODataModule(LightningDataModule):
         self.num_workers = 4
         self.shuffle = True
 
-        with open('wordmap.json', 'r') as j:
-            self.word_map = json.load(j)
-
         transform = transforms.Compose([
             transforms.Resize((256, 256)),
             transforms.ToTensor(),

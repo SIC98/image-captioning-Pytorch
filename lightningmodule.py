@@ -4,10 +4,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence
 from nltk.translate.bleu_score import corpus_bleu
-import json
+from transformers import GPT2Tokenizer
 import wandb
 
 from utils import encode_texts, encode_texts_2d
+
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 
 
 class LightningModule(pl.LightningModule):
@@ -21,9 +23,6 @@ class LightningModule(pl.LightningModule):
         self.validation_step_outputs = []
 
         self.loss = nn.CrossEntropyLoss()
-
-        with open('wordmap.json', 'r') as j:
-            self.word_map = json.load(j)
 
     def training_step(self, batch, batch_idx):  # optimizer_idx
         encoder_opt, decoder_opt = self.optimizers()
@@ -93,9 +92,11 @@ class LightningModule(pl.LightningModule):
         allcaps = allcaps[sort_ind]
         for j in range(allcaps.shape[0]):
             img_caps = allcaps[j].tolist()
-            img_captions = list(
-                map(lambda c: [w for w in c if w not in {self.word_map['<start>'], self.word_map['<pad>']}],
-                    img_caps))  # remove <start> and pads
+            img_captions = [tokenizer.decode(
+                [token for token in img_cap if token != 50256]) for img_cap in img_caps
+            ]
+            img_captions = [img_caption.split()
+                            for img_caption in img_captions]
             references.append(img_captions)
 
         # Hypotheses
@@ -105,6 +106,8 @@ class LightningModule(pl.LightningModule):
         for j, p in enumerate(preds):
             temp_preds.append(preds[j][:decode_lengths[j]])  # remove pads
         preds = temp_preds
+
+        preds = [tokenizer.decode(pred).split() for pred in preds]
         hypotheses.extend(preds)
 
         assert len(references) == len(hypotheses)
@@ -149,8 +152,8 @@ class LightningModule(pl.LightningModule):
 
         cap = [c[0] for c in allcaps]
 
-        tokenized_cap, caplens = encode_texts(cap, self.word_map)
-        tokenized_allcaps = encode_texts_2d(allcaps, self.word_map)
+        tokenized_cap, caplens = encode_texts(cap, tokenizer)
+        tokenized_allcaps = encode_texts_2d(allcaps, tokenizer)
 
         return img, torch.tensor(tokenized_cap, device=self.device), torch.tensor(tokenized_allcaps, device=self.device), torch.tensor(caplens, device=self.device)
 
