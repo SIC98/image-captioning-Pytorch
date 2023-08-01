@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence
-from nltk.translate.bleu_score import corpus_bleu
 import json
 import wandb
 import random
@@ -110,39 +109,10 @@ class LightningModule(pl.LightningModule):
 
         assert len(references) == len(hypotheses)
 
-        result = {
+        return {
             'loss': loss,
             'references': references,
             'hypotheses': hypotheses
-        }
-
-        self.validation_step_outputs.append(result)
-
-        return {
-            'loss': loss
-        }
-
-    def on_validation_epoch_end(self):
-        references = list()
-        hypotheses = list()
-        loss = []
-
-        for output in self.validation_step_outputs:
-            references.extend(output['references'])
-            hypotheses.extend(output['hypotheses'])
-            loss.append(output['loss'])
-
-        bleu4 = corpus_bleu(references, hypotheses)
-
-        print("results:", bleu4, sum(loss) / len(loss))
-
-        wandb.log({'Bleu4': bleu4})
-
-        self.validation_step_outputs.clear()
-
-        return {
-            'bleu4': bleu4,
-            'loss': sum(loss) / len(loss)
         }
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
