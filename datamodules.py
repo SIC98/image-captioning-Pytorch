@@ -12,7 +12,6 @@ class COCODataModule(LightningDataModule):
         self.train_batch_size = 32
         self.valid_batch_size = 32
         self.num_workers = 4
-        self.shuffle = True
 
         with open('wordmap.json', 'r') as j:
             self.word_map = json.load(j)
@@ -48,7 +47,7 @@ class COCODataModule(LightningDataModule):
             batch_size=self.train_batch_size,
             drop_last=True,
             num_workers=self.num_workers,
-            shuffle=self.shuffle,
+            shuffle=True,
             collate_fn=collate_fn
         )
 
@@ -58,7 +57,7 @@ class COCODataModule(LightningDataModule):
             batch_size=self.valid_batch_size,
             drop_last=False,
             num_workers=self.num_workers,
-            shuffle=self.shuffle,
+            shuffle=False,
             collate_fn=collate_fn
         )
 
