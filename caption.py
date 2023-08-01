@@ -4,6 +4,7 @@ from PIL import Image
 
 from skimage import io
 from skimage.transform import resize
+from transformers import GPT2Model, GPT2Tokenizer
 
 import argparse
 import matplotlib.cm as cm
@@ -20,20 +21,20 @@ from models.models import EncoderDecoder
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=3):
+def caption_image_beam_search(encoder, decoder, image_path, tokenizer, beam_size=3):
     """
     Reads an image and captions it with beam search.
 
     :param encoder: encoder model
     :param decoder: decoder model
     :param image_path: path to image
-    :param word_map: word map
+    :param tokenizer: tokenizer
     :param beam_size: number of sequences to consider at each decode-step
     :return: caption, weights for visualization
     """
 
     k = beam_size
-    vocab_size = len(word_map)
+    vocab_size = tokenizer.vocab_size
 
     # Read image and process
     img = io.imread(image_path)
@@ -67,7 +68,7 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
 
     # Tensor to store top k previous words at each step; now they're just <start>
     k_prev_words = torch.LongTensor(
-        [[word_map['<start>']]] * k).to(device)  # (k, 1)
+        [[50256]] * k).to(device)  # (k, 1)
 
     # Tensor to store top k sequences; now they're just <start>
     seqs = k_prev_words  # (k, 1)
@@ -133,7 +134,7 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
 
         # Which sequences are incomplete (didn't reach <end>)?
         incomplete_inds = [ind for ind, next_word in enumerate(next_word_inds) if
-                           next_word != word_map['<end>']]
+                           next_word != 50256]
         complete_inds = list(
             set(range(len(next_word_inds))) - set(incomplete_inds))
 
@@ -169,17 +170,20 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
 
 if __name__ == '__main__':
 
+    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+    gpt2 = GPT2Model.from_pretrained('gpt2')
+
     model = EncoderDecoder(
         attention_dim=512,
-        embed_dim=512,
+        embed_dim=gpt2.wte.weight.shape[1],
         decoder_dim=512,
-        vocab_size=12982,
+        vocab_size=tokenizer.vocab_size,
         encoder_dim=2048,
         dropout=0.5
     )
 
     checkpoint = torch.load(
-        'wandb/run-20230731_114904-7twg4vj4/files/epoch=5-step=44352.ckpt'
+        'wandb/run-20230731_234903-3pag4o5x/files/epoch=3-step=29568.ckpt'
     )
 
     new_state_dict = OrderedDict()
@@ -195,16 +199,12 @@ if __name__ == '__main__':
     decoder = model.decoder
     encoder = model.encoder
 
-    with open('wordmap.json', 'r') as j:
-        word_map = json.load(j)
-
     parser = argparse.ArgumentParser(
         description='Show, Attend, and Tell - Tutorial - Generate Caption')
 
     parser.add_argument(
         '--img', '-i', default='images/51232785.jpeg', help='path to image')
     # parser.add_argument('--model', '-m', help='path to model')
-    # parser.add_argument('--word_map', '-wm', help='path to word map JSON')
     parser.add_argument('--beam_size', '-b', default=5,
                         type=int, help='beam size for beam search')
     parser.add_argument('--dont_smooth', dest='smooth',
@@ -212,17 +212,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    rev_word_map = {v: k for k, v in word_map.items()}  # ix2word
-
     # # Encode, decode with attention and beam search
     seq, alphas = caption_image_beam_search(
-        encoder, decoder, args.img, word_map, args.beam_size)
+        encoder, decoder, args.img, tokenizer, args.beam_size)
     alphas = torch.FloatTensor(alphas)
 
-    words = [rev_word_map[ind] for ind in seq]
-
-    for item in ['<start>', '<end>', '<unk>']:
-        if item in words:
-            words.remove(item)
-
-    print(' '.join(words))
+    # words = [tokenizer.encode(ind) for ind in seq]
+    print(tokenizer.decode(seq))
