@@ -6,6 +6,7 @@ from torch.nn.utils.rnn import pack_padded_sequence
 from nltk.translate.bleu_score import corpus_bleu
 import json
 import wandb
+import random
 
 from utils import encode_texts, encode_texts_2d
 
@@ -147,7 +148,7 @@ class LightningModule(pl.LightningModule):
     def on_before_batch_transfer(self, batch, dataloader_idx):
         img, allcaps = batch
 
-        cap = [c[0] for c in allcaps]
+        cap = [random.choice(c) for c in allcaps]
 
         tokenized_cap, caplens = encode_texts(cap, self.word_map)
         tokenized_allcaps = encode_texts_2d(allcaps, self.word_map)
