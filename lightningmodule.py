@@ -94,12 +94,12 @@ class LightningModule(pl.LightningModule):
         for j in range(allcaps.shape[0]):
             img_caps = allcaps[j].tolist()
             img_captions = list(
-                map(lambda c: [w for w in c if w not in {self.word_map['<start>'], self.word_map['<pad>'], self.word_map['<end>']}],
+                map(lambda c: [w for w in c if w not in {self.word_map['<start>'], self.word_map['<pad>']}],
                     img_caps))  # remove <start> and pads
 
             # Remove empty reference
             img_captions = [
-                not_empty_str for not_empty_str in img_captions if not_empty_str != []
+                not_empty_str for not_empty_str in img_captions if not_empty_str != [self.word_map['<end>']]
             ]
             references.append(img_captions)
 
