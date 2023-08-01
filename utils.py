@@ -36,7 +36,7 @@ def encode_texts(texts, word_map):
 
 
 def encode_text(text, word_map):
-    words = text.split(" ")
+    words = text.split()
 
     # Adding "<start>" and "<end>" tokens and encoding the words
     words_encoded = [word_map.get(
