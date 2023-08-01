@@ -123,7 +123,10 @@ class LightningModule(pl.LightningModule):
         tokenized_cap, caplens = encode_texts(cap, self.word_map)
         tokenized_allcaps = encode_texts_2d(allcaps, self.word_map)
 
-        return img, torch.tensor(tokenized_cap, device=self.device), torch.tensor(tokenized_allcaps, device=self.device), torch.tensor(caplens, device=self.device)
+        return img, \
+            torch.tensor(tokenized_cap, device=self.device), \
+            torch.tensor(tokenized_allcaps, device=self.device), \
+            torch.tensor(caplens, device=self.device)
 
     def configure_optimizers(self):
         encoder_optimizer = torch.optim.AdamW(
