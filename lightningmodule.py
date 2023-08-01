@@ -6,6 +6,7 @@ from torch.nn.utils.rnn import pack_padded_sequence
 from nltk.translate.bleu_score import corpus_bleu
 from transformers import GPT2Tokenizer
 import wandb
+import random
 
 from utils import encode_texts, encode_texts_2d
 
@@ -95,8 +96,14 @@ class LightningModule(pl.LightningModule):
             img_captions = [tokenizer.decode(
                 [token for token in img_cap if token != 50256]) for img_cap in img_caps
             ]
+  
+            img_captions = [
+                not_empty_str for not_empty_str in img_captions if not_empty_str != []
+            ]
+
             img_captions = [img_caption.split()
                             for img_caption in img_captions]
+
             references.append(img_captions)
 
         # Hypotheses
@@ -112,50 +119,29 @@ class LightningModule(pl.LightningModule):
 
         assert len(references) == len(hypotheses)
 
-        result = {
+        return {
             'loss': loss,
             'references': references,
             'hypotheses': hypotheses
         }
 
-        self.validation_step_outputs.append(result)
-
-        return {
-            'loss': loss
-        }
-
-    def on_validation_epoch_end(self):
-        references = list()
-        hypotheses = list()
-        loss = []
-
-        for output in self.validation_step_outputs:
-            references.extend(output['references'])
-            hypotheses.extend(output['hypotheses'])
-            loss.append(output['loss'])
-
-        bleu4 = corpus_bleu(references, hypotheses)
-
-        print("results:", bleu4, sum(loss) / len(loss))
-
-        wandb.log({'Bleu4': bleu4})
-
-        self.validation_step_outputs.clear()
-
-        return {
-            'bleu4': bleu4,
-            'loss': sum(loss) / len(loss)
-        }
-
     def on_before_batch_transfer(self, batch, dataloader_idx):
         img, allcaps = batch
 
-        cap = [c[0] for c in allcaps]
+        # Delete empty caption
+        cap = [
+            random.choice(
+                [not_empty_str for not_empty_str in c if not_empty_str != '']
+            ) for c in allcaps
+        ]
 
         tokenized_cap, caplens = encode_texts(cap, tokenizer)
         tokenized_allcaps = encode_texts_2d(allcaps, tokenizer)
 
-        return img, torch.tensor(tokenized_cap, device=self.device), torch.tensor(tokenized_allcaps, device=self.device), torch.tensor(caplens, device=self.device)
+        return img, \
+            torch.tensor(tokenized_cap, device=self.device), \
+            torch.tensor(tokenized_allcaps, device=self.device), \
+            torch.tensor(caplens, device=self.device)
 
     def configure_optimizers(self):
         encoder_optimizer = torch.optim.AdamW(

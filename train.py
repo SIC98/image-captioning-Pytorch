@@ -1,5 +1,5 @@
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, EarlyStopping
 from pytorch_lightning.loggers import WandbLogger
 from transformers import GPT2Model, GPT2Tokenizer
 
@@ -40,13 +40,15 @@ trainer = pl.Trainer(
     ],
     callbacks=[
         ModelCheckpoint(
+            monitor='valid_loss',
             dirpath=wandb.run.dir,
-            save_top_k=-1,
+            save_top_k=1,
         ),
         LearningRateMonitor(logging_interval='step'),
+        EarlyStopping(monitor='valid_loss', mode='min', patience=3),
         OutputLogger(),
     ],
-    max_epochs=10,
+    max_epochs=-1,
 )
 
 trainer.fit(
