@@ -13,9 +13,6 @@ class COCODataModule(LightningDataModule):
         self.valid_batch_size = 32
         self.num_workers = 4
 
-        with open('wordmap.json', 'r') as j:
-            self.word_map = json.load(j)
-
         transform = transforms.Compose([
             transforms.Resize((256, 256)),
             transforms.ToTensor(),
