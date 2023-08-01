@@ -3,7 +3,6 @@ from typing import Any
 import pytorch_lightning as pl
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 from nltk.translate.bleu_score import corpus_bleu
-import torch
 
 
 class OutputLogger(pl.Callback):
@@ -51,7 +50,7 @@ class OutputLogger(pl.Callback):
     ) -> None:
         bleu4 = corpus_bleu(self.references, self.hypotheses)
 
-        pl_module.log('Bleu4', torch.float(bleu4))
+        pl_module.log('Bleu4', float(bleu4))
         pl_module.log(
             'valid_loss',
             sum(self.valid_loss) / len(self.valid_loss)
