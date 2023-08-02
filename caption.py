@@ -183,8 +183,9 @@ if __name__ == '__main__':
     )
 
     checkpoint = torch.load(
-        'wandb/run-20230731_234903-3pag4o5x/files/epoch=3-step=29568.ckpt'
+        './wandb/run-20230802_030029-1y02hjfd/files/epoch=20-step=155232.ckpt'
     )
+    # 'wandb/run-20230731_234903-3pag4o5x/files/epoch=3-step=29568.ckpt': Old model
 
     new_state_dict = OrderedDict()
     for n, v in checkpoint['state_dict'].items():
