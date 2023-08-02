@@ -33,7 +33,7 @@ class Encoder(nn.Module):
         self.enc_image_size = encoded_image_size
 
         resnet = torchvision.models.resnet101(
-            pretrained=True
+            weights='ResNet101_Weights.DEFAULT'
         )  # pretrained ImageNet ResNet-101
 
         # Remove linear and pool layers (since we're not doing classification)
