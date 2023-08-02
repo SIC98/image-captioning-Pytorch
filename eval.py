@@ -8,24 +8,29 @@ from tqdm import tqdm
 from collections import OrderedDict
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-from cocodatasets import CaptionDataset
+from transformers import GPT2Model, GPT2Tokenizer
 import json
 
 from models.models import EncoderDecoder
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+gpt2 = GPT2Model.from_pretrained('gpt2')
+
+vocab_size = tokenizer.vocab_size
+
 model = EncoderDecoder(
     attention_dim=512,
-    embed_dim=512,
+    embed_dim=gpt2.wte.weight.shape[1],
     decoder_dim=512,
-    vocab_size=14626,
+    vocab_size=tokenizer.vocab_size,
     encoder_dim=2048,
     dropout=0.5
 )
 
 checkpoint = torch.load(
-    './wandb/run-20230803_232809-2pfq2gp1/files/epoch=7-step=295712.ckpt'
+    './wandb/run-20230802_030029-1y02hjfd/files/epoch=20-step=155232.ckpt'
 )
 
 new_state_dict = OrderedDict()
@@ -41,19 +46,7 @@ model.eval()
 decoder = model.decoder
 encoder = model.encoder
 
-with open('wordmap.json', 'r') as j:
-    word_map = json.load(j)
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-rev_word_map = {v: k for k, v in word_map.items()}
-vocab_size = len(word_map)
-
-# Normalization transform
-normalize = transforms.Normalize(
-    mean=[0.485, 0.456, 0.406],
-    std=[0.229, 0.224, 0.225]
-)
 
 
 def evaluate(beam_size):
@@ -102,8 +95,7 @@ def evaluate(beam_size):
         if i % 5 != 0:
             continue
 
-        tokenized_allcaps = encode_texts_2d(allcaps, word_map)
-
+        tokenized_allcaps = encode_texts_2d(allcaps, tokenizer)
         allcaps = torch.tensor(tokenized_allcaps, device=device)
 
         k = beam_size
@@ -127,7 +119,7 @@ def evaluate(beam_size):
 
         # Tensor to store top k previous words at each step; now they're just <start>
         k_prev_words = torch.LongTensor(
-            [[word_map['<start>']]] * k).to(device)  # (k, 1)
+            [[50256]] * k).to(device)  # (k, 1)
 
         # Tensor to store top k sequences; now they're just <start>
         seqs = k_prev_words  # (k, 1)
@@ -185,7 +177,7 @@ def evaluate(beam_size):
 
             # Which sequences are incomplete (didn't reach <end>)?
             incomplete_inds = [ind for ind, next_word in enumerate(next_word_inds) if
-                               next_word != word_map['<end>']]
+                               next_word != 50256]
             complete_inds = list(
                 set(range(len(next_word_inds))) - set(incomplete_inds))
 
@@ -217,13 +209,12 @@ def evaluate(beam_size):
             # References
             img_caps = allcaps[0].tolist()
             img_captions = list(
-                map(lambda c: [w for w in c if w not in {word_map['<start>'], word_map['<end>'], word_map['<pad>']}],
+                map(lambda c: [w for w in c if w not in {50256}],
                     img_caps))  # remove <start> and pads
             references.append(img_captions)
 
             # Hypotheses
-            hypotheses.append([w for w in seq if w not in {
-                word_map['<start>'], word_map['<end>'], word_map['<pad>']}])
+            hypotheses.append([w for w in seq if w not in {50256}])
 
             assert len(references) == len(hypotheses)
 
