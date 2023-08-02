@@ -1,7 +1,6 @@
 import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
-from datasets import *
 from utils import *
 from nltk.translate.bleu_score import corpus_bleu
 import torch.nn.functional as F
@@ -25,7 +24,7 @@ model = EncoderDecoder(
 )
 
 checkpoint = torch.load(
-    'wandb/run-20230731_114904-7twg4vj4/files/epoch=5-step=44352.ckpt'
+    'wandb/run-20230801_210421-n3bzqb9t/files/epoch=16-step=125664.ckpt'
 )
 
 new_state_dict = OrderedDict()
