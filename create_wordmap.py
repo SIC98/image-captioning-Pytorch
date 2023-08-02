@@ -20,7 +20,7 @@ dataset = [train_dataset, val_dataset]
 for data in dataset:
     for img, texts in data:
         for text in texts:
-            word_freq.update(text.lower().split())
+            word_freq.update(text.split())
 
 # Total words: 44920
 print('Total words:', len(word_freq.keys()))
