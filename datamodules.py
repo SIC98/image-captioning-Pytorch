@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import json
 
+from cocodatasets import CaptionDataset
 from utils import collate_fn
 
 
@@ -25,16 +26,18 @@ class COCODataModule(LightningDataModule):
             )
         ])
 
-        self.train_dataset = datasets.CocoCaptions(
+        self.train_dataset = CaptionDataset(
             root='coco2017/train2017',
             annFile='coco2017/annotations/captions_train2017.json',
-            transform=transform
+            transform=transform,
+            cpi=5
         )
 
-        self.val_dataset = datasets.CocoCaptions(
+        self.val_dataset = CaptionDataset(
             root='coco2017/val2017',
             annFile='coco2017/annotations/captions_val2017.json',
-            transform=transform
+            transform=transform,
+            cpi=5
         )
 
     def setup(self, stage=None):
@@ -48,7 +51,7 @@ class COCODataModule(LightningDataModule):
             drop_last=True,
             num_workers=self.num_workers,
             shuffle=True,
-            collate_fn=collate_fn
+            # collate_fn=collate_fn
         )
 
     def val_dataloader(self):
@@ -58,7 +61,7 @@ class COCODataModule(LightningDataModule):
             drop_last=False,
             num_workers=self.num_workers,
             shuffle=False,
-            collate_fn=collate_fn
+            # collate_fn=collate_fn
         )
 
 
