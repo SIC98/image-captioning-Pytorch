@@ -180,7 +180,7 @@ if __name__ == '__main__':
     )
 
     checkpoint = torch.load(
-        './wandb/run-20230802_224243-ehfu6kee/files/epoch=19-step=147840.ckpt'
+        './wandb/run-20230803_041002-x8wr8dvp/files/epoch=13-step=103488.ckpt'
     )
 
     new_state_dict = OrderedDict()

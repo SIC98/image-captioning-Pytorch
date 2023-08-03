@@ -24,7 +24,7 @@ model = EncoderDecoder(
 )
 
 checkpoint = torch.load(
-    './wandb/run-20230802_224243-ehfu6kee/files/epoch=19-step=147840.ckpt'
+    './wandb/run-20230803_041002-x8wr8dvp/files/epoch=13-step=103488.ckpt'
 )
 
 new_state_dict = OrderedDict()
@@ -236,5 +236,5 @@ def evaluate(beam_size):
 
 
 if __name__ == '__main__':
-    beam_size = 3
+    beam_size = 5
     print(f"BLEU-4 score @ beam size of {beam_size} is {evaluate(beam_size)}")
