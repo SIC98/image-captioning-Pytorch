@@ -125,9 +125,7 @@ class LightningModule(pl.LightningModule):
 
         # Delete empty caption
         cap = [
-            random.choice(
-                [not_empty_str for not_empty_str in c if not_empty_str != '']
-            ) for c in allcaps
+            c[0] for c in allcaps  # 0 ~ 4
         ]
 
         tokenized_cap, caplens = encode_texts(cap, self.word_map)
