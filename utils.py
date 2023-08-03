@@ -3,6 +3,7 @@ import torch
 
 def encode_texts_2d(texts_2d, word_map):
     # Flatten the list of lists and encode texts
+    texts_2d = [list(t) for t in zip(*texts_2d)]
     encoded_texts = [encode_texts(texts, word_map)[0] for texts in texts_2d]
 
     # Finding the maximum length
