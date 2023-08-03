@@ -121,16 +121,9 @@ class LightningModule(pl.LightningModule):
         }
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
-        img, allcaps = batch
+        img, caption, allcaps = batch
 
-        # Delete empty caption
-        cap = [
-            random.choice(
-                [not_empty_str for not_empty_str in c if not_empty_str != '']
-            ) for c in allcaps
-        ]
-
-        tokenized_cap, caplens = encode_texts(cap, self.word_map)
+        tokenized_cap, caplens = encode_texts(caption, self.word_map)
         tokenized_allcaps = encode_texts_2d(allcaps, self.word_map)
 
         return img, \
