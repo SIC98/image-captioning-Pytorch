@@ -8,6 +8,7 @@ from tqdm import tqdm
 from collections import OrderedDict
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
+from cocodatasets import CaptionDataset
 import json
 
 from models.models import EncoderDecoder
@@ -24,7 +25,7 @@ model = EncoderDecoder(
 )
 
 checkpoint = torch.load(
-    './wandb/run-20230802_224243-ehfu6kee/files/epoch=19-step=147840.ckpt'
+    './wandb/run-20230803_232809-2pfq2gp1/files/epoch=7-step=295712.ckpt'
 )
 
 new_state_dict = OrderedDict()
@@ -71,10 +72,11 @@ def evaluate(beam_size):
         )
     ])
 
-    dataset = datasets.CocoCaptions(
+    dataset = CaptionDataset(
         root='coco2017/val2017',
         annFile='coco2017/annotations/captions_val2017.json',
-        transform=transform
+        transform=transform,
+        cpi=5
     )
 
     loader = DataLoader(
@@ -83,7 +85,6 @@ def evaluate(beam_size):
         drop_last=False,
         num_workers=4,
         shuffle=False,
-        collate_fn=collate_fn
     )
 
     # TODO: Batched Beam Search
@@ -95,18 +96,15 @@ def evaluate(beam_size):
     references = list()
     hypotheses = list()
 
-    for i, (image, allcaps) in enumerate(
+    for i, (image, _, allcaps) in enumerate(
         tqdm(loader, desc="EVALUATING AT BEAM SIZE " + str(beam_size))
     ):
+        if i % 5 != 0:
+            continue
 
-        cap = [c[0] for c in allcaps]
+        tokenized_allcaps = encode_texts_2d(allcaps, word_map, transpose=True)
 
-        tokenized_cap, caplens = encode_texts(cap, word_map)
-        tokenized_allcaps = encode_texts_2d(allcaps, word_map)
-
-        cap = torch.tensor(tokenized_cap, device=device)
         allcaps = torch.tensor(tokenized_allcaps, device=device)
-        caplens = torch.tensor(caplens, device=device)
 
         k = beam_size
 
