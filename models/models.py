@@ -32,9 +32,9 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.enc_image_size = encoded_image_size
 
-        resnet = torchvision.models.resnet101(
-            weights='ResNet101_Weights.DEFAULT'
-        )  # pretrained ImageNet ResNet-101
+        resnet = torchvision.models.resnet152(
+            weights='ResNet152_Weights.DEFAULT'
+        )  # pretrained ImageNet ResNet-152
 
         # Remove linear and pool layers (since we're not doing classification)
         modules = list(resnet.children())[:-2]
