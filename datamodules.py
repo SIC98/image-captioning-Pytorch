@@ -30,14 +30,14 @@ class COCODataModule(LightningDataModule):
             root='coco2017/train2017',
             annFile='coco2017/annotations/captions_train2017.json',
             transform=transform,
-            cpi=5
+            cpi=2
         )
 
         self.val_dataset = CaptionDataset(
             root='coco2017/val2017',
             annFile='coco2017/annotations/captions_val2017.json',
             transform=transform,
-            cpi=5
+            cpi=2
         )
 
     def setup(self, stage=None):

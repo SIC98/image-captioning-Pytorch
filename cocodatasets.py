@@ -27,9 +27,14 @@ class CaptionDataset(Dataset):
         # Remember, the Nth caption corresponds to the (N // captions_per_image)th image
         img = self.dataset[i // self.cpi][0]
 
-        caption = self.dataset[i // self.cpi][1][i % self.cpi]
+        if i % self.cpi == 0:
+            caption = self.dataset[i // self.cpi][1][0]
+        else:
+            caption = self.dataset[i // self.cpi][1][-1]
 
-        all_captions = self.dataset[i // self.cpi][1][:self.cpi]
+        # caption = self.dataset[i // self.cpi][1][i % self.cpi] # Run eval.py
+
+        all_captions = self.dataset[i // self.cpi][1]
 
         return img, caption, all_captions
 

@@ -25,7 +25,7 @@ model = EncoderDecoder(
 )
 
 checkpoint = torch.load(
-    './wandb/run-20230803_232809-2pfq2gp1/files/epoch=7-step=295712.ckpt'
+    './wandb/run-20230804_213124-3een1t4p/files/epoch=5-step=88704.ckpt'
 )
 
 new_state_dict = OrderedDict()
@@ -102,7 +102,7 @@ def evaluate(beam_size):
         if i % 5 != 0:
             continue
 
-        tokenized_allcaps = encode_texts_2d(allcaps, word_map, transpose=True)
+        tokenized_allcaps = encode_texts_2d(allcaps, word_map)
 
         allcaps = torch.tensor(tokenized_allcaps, device=device)
 
