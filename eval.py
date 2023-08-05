@@ -102,7 +102,7 @@ def evaluate(beam_size):
         if i % 5 != 0:
             continue
 
-        tokenized_allcaps = encode_texts_2d(allcaps, word_map, transpose=True)
+        tokenized_allcaps = encode_texts_2d(allcaps, word_map)
 
         allcaps = torch.tensor(tokenized_allcaps, device=device)
 
