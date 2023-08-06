@@ -6,23 +6,30 @@ import json
 word_freq = Counter()
 
 train_dataset = datasets.CocoCaptions(
-    root='coco2017/train2017',
-    annFile='coco2017/annotations/captions_train2017.json',
+    root='coco2014/train2014',
+    annFile='coco2014/caption_datasets/captions_train2014.json',
 )
 
 val_dataset = datasets.CocoCaptions(
-    root='coco2017/val2017',
-    annFile='coco2017/annotations/captions_val2017.json',
+    root='coco2014/val2014',
+    annFile='coco2014/caption_datasets/captions_val2014.json',
 )
 
-dataset = [train_dataset, val_dataset]
+test_dataset = datasets.CocoCaptions(
+    root='coco2014/val2014',
+    annFile='coco2014/caption_datasets/captions_test2014.json',
+)
+
+print(len(train_dataset), len(val_dataset), len(test_dataset))
+
+dataset = [train_dataset, val_dataset, test_dataset]
 
 for data in dataset:
     for img, texts in data:
         for text in texts:
             word_freq.update(text.split())
 
-# Total words: 54231
+# Total words: 47175
 print('Total words:', len(word_freq.keys()))
 
 words = [w for w in word_freq.keys() if word_freq[w] > 5]
@@ -33,7 +40,7 @@ word_map['<start>'] = len(word_map) + 1
 word_map['<end>'] = len(word_map) + 1
 word_map['<pad>'] = 0
 
-# Total tokens: 14626
+# Total tokens: 12777
 print('Total tokens:', len(word_map))
 
 with open(os.path.join('wordmap.json'), 'w') as j:
