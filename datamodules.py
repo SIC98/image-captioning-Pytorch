@@ -27,15 +27,22 @@ class COCODataModule(LightningDataModule):
         ])
 
         self.train_dataset = CaptionDataset(
-            root='coco2017/train2017',
-            annFile='coco2017/annotations/captions_train2017.json',
+            root='coco2014/train2014',
+            annFile='coco2014/caption_datasets/captions_train2014.json',
             transform=transform,
             cpi=5
         )
 
         self.val_dataset = CaptionDataset(
-            root='coco2017/val2017',
-            annFile='coco2017/annotations/captions_val2017.json',
+            root='coco2014/val2014',
+            annFile='coco2014/caption_datasets/captions_val2014.json',
+            transform=transform,
+            cpi=5
+        )
+
+        self.test_dataset = CaptionDataset(
+            root='coco2014/val2014',
+            annFile='coco2014/caption_datasets/captions_test2014.json',
             transform=transform,
             cpi=5
         )
