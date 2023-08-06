@@ -65,11 +65,10 @@ def evaluate(beam_size):
         )
     ])
 
-    dataset = CaptionDataset(
+    dataset = datasets.CocoCaptions(
         root='coco2017/val2017',
         annFile='coco2017/annotations/captions_val2017.json',
-        transform=transform,
-        cpi=5
+        transform=transform
     )
 
     loader = DataLoader(
@@ -78,6 +77,7 @@ def evaluate(beam_size):
         drop_last=False,
         num_workers=4,
         shuffle=False,
+        collate_fn=collate_fn
     )
 
     # TODO: Batched Beam Search
@@ -89,11 +89,9 @@ def evaluate(beam_size):
     references = list()
     hypotheses = list()
 
-    for i, (image, _, allcaps) in enumerate(
+    for i, (image, allcaps) in enumerate(
         tqdm(loader, desc="EVALUATING AT BEAM SIZE " + str(beam_size))
     ):
-        if i % 5 != 0:
-            continue
 
         tokenized_allcaps = encode_texts_2d(allcaps, tokenizer)
         allcaps = torch.tensor(tokenized_allcaps, device=device)
@@ -211,10 +209,17 @@ def evaluate(beam_size):
             img_captions = list(
                 map(lambda c: [w for w in c if w not in {50256}],
                     img_caps))  # remove <start> and pads
+
+            img_captions = [tokenizer.decode(img_caption).split()
+                            for img_caption in img_captions]
+
             references.append(img_captions)
 
             # Hypotheses
-            hypotheses.append([w for w in seq if w not in {50256}])
+            predict_sentece = tokenizer.decode(
+                [w for w in seq if w not in {50256}])
+
+            hypotheses.append(predict_sentece.split())
 
             assert len(references) == len(hypotheses)
 
@@ -225,5 +230,5 @@ def evaluate(beam_size):
 
 
 if __name__ == '__main__':
-    beam_size = 5
+    beam_size = 3
     print(f"BLEU-4 score @ beam size of {beam_size} is {evaluate(beam_size)}")
