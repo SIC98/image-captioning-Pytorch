@@ -30,7 +30,7 @@ class CaptionDataset(Dataset):
 
         caption = self.dataset[i // self.cpi][1][i % self.cpi]
 
-        all_captions = self.dataset[i // self.cpi][1]
+        all_captions = self.dataset[i // self.cpi][1][:self.cpi]
 
         return img, caption, all_captions
 
