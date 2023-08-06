@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset
 from torchvision import datasets
+from typing import Any, Tuple
 
 
 class CaptionDataset(Dataset):
@@ -35,3 +36,16 @@ class CaptionDataset(Dataset):
 
     def __len__(self):
         return self.dataset_size
+
+
+class CocoCaptionsWithIds(datasets.CocoCaptions):
+
+    def __getitem__(self, index: int) -> Tuple[Any, Any, Any]:
+        id = self.ids[index]
+        image = self._load_image(id)
+        target = self._load_target(id)
+
+        if self.transforms is not None:
+            image, target = self.transforms(image, target)
+
+        return id, image, target
