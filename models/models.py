@@ -166,13 +166,13 @@ class DecoderWithAttention(nn.Module):
         self.fc.bias.data.fill_(0)
         self.fc.weight.data.uniform_(-0.1, 0.1)
 
-    def load_pretrained_embeddings(self, embeddings):
+    def load_pretrained_embeddings(self, weight, freeze):
         """
         Loads embedding layer with pre-trained embeddings.
 
         :param embeddings: pre-trained embeddings
         """
-        self.embedding = embeddings
+        self.embedding = nn.Embedding.from_pretrained(weight, freeze=freeze)
 
     def fine_tune_embeddings(self, fine_tune=True):
         """
