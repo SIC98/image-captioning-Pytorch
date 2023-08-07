@@ -25,7 +25,8 @@ model = EncoderDecoder(
 )
 
 checkpoint = torch.load(
-    './wandb/run-20230803_232809-2pfq2gp1/files/epoch=7-step=295712.ckpt'
+    # './wandb/run-20230803_232809-2pfq2gp1/files/epoch=7-step=295712.ckpt'
+    './wandb/run-20230807_031014-j1w2hsi8/files/epoch=7-step=206944.ckpt'
 )
 
 new_state_dict = OrderedDict()
@@ -73,8 +74,9 @@ def evaluate(beam_size):
     ])
 
     dataset = CaptionDataset(
-        root='coco2017/val2017',
-        annFile='coco2017/annotations/captions_val2017.json',
+        root='coco2014/val2014',
+        # 'coco2014/caption_datasets/captions_val2014.json'
+        annFile='coco2014/caption_datasets/captions_test2014.json',
         transform=transform,
         cpi=5
     )
