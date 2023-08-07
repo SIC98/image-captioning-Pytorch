@@ -26,8 +26,7 @@ class LightningModule(pl.LightningModule):
             self.word_map = json.load(j)
 
     def training_step(self, batch, batch_idx):  # optimizer_idx
-        encoder_opt, decoder_opt = self.optimizers()
-        encoder_opt.zero_grad()
+        decoder_opt = self.optimizers()
         decoder_opt.zero_grad()
 
         img, cap, allcaps, caplens = batch
@@ -55,7 +54,6 @@ class LightningModule(pl.LightningModule):
         loss += alpha_c * ((1. - alphas.sum(dim=1)) ** 2).mean()
 
         self.manual_backward(loss)
-        encoder_opt.step()
         decoder_opt.step()
 
         return {
@@ -132,12 +130,12 @@ class LightningModule(pl.LightningModule):
             torch.tensor(caplens, device=self.device)
 
     def configure_optimizers(self):
-        encoder_optimizer = torch.optim.AdamW(
-            params=self.model.encoder.parameters(),
-            lr=1e-4,
-        )
+        # encoder_optimizer = torch.optim.AdamW(
+        #     params=self.model.encoder.parameters(),
+        #     lr=1e-4,
+        # )
         decoder_optimizer = torch.optim.AdamW(
             params=self.model.decoder.parameters(),
             lr=4e-4,
         )
-        return [encoder_optimizer, decoder_optimizer]
+        return [decoder_optimizer]
