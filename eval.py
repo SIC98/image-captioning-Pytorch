@@ -25,8 +25,7 @@ model = EncoderDecoder(
 )
 
 checkpoint = torch.load(
-    # './wandb/run-20230803_232809-2pfq2gp1/files/epoch=7-step=295712.ckpt'
-    './wandb/run-20230807_031014-j1w2hsi8/files/epoch=7-step=206944.ckpt'
+    './wandb/run-20230807_111626-bojfhtqv/files/epoch=6-step=181076.ckpt'
 )
 
 new_state_dict = OrderedDict()
