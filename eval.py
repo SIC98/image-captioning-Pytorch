@@ -9,6 +9,7 @@ from collections import OrderedDict
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from transformers import GPT2Model, GPT2Tokenizer
+from cocodatasets import CaptionDataset
 import json
 
 from models.models import EncoderDecoder
@@ -208,13 +209,18 @@ def evaluate(beam_size):
 
             # References
             img_caps = allcaps[0].tolist()
-            img_captions = list(
-                map(lambda c: [w for w in c if w not in {50256}],
-                    img_caps))  # remove <start> and pads
+            img_captions = [tokenizer.decode(
+                [token for token in img_cap if token != 50256]) for img_cap in img_caps
+            ]
+            img_captions = [img_caption.split()
+                            for img_caption in img_captions]
             references.append(img_captions)
 
             # Hypotheses
-            hypotheses.append([w for w in seq if w not in {50256}])
+            preds = tokenizer.decode(
+                [w for w in seq if w not in {50256}]
+            ).split()
+            hypotheses.append(preds)
 
             assert len(references) == len(hypotheses)
 
