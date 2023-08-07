@@ -16,7 +16,7 @@ model = EncoderDecoder(
     attention_dim=512,
     embed_dim=512,
     decoder_dim=512,
-    vocab_size=14626,
+    vocab_size=12777,
     encoder_dim=2048,
     dropout=0.5
 )
