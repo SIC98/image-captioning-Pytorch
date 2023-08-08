@@ -13,7 +13,9 @@ from utils import encode_texts, encode_texts_2d
 class LightningModule(pl.LightningModule):
     def __init__(
         self,
-        model: nn.Module
+        model: nn.Module,
+        train_encoder: bool,
+        train_decoder: bool
     ):
         super().__init__()
         self.model = model
@@ -22,12 +24,19 @@ class LightningModule(pl.LightningModule):
 
         self.loss = nn.CrossEntropyLoss()
 
+        self.train_encoder = train_encoder
+        self.train_decoder = train_decoder
+
         with open('wordmap.json', 'r') as j:
             self.word_map = json.load(j)
 
     def training_step(self, batch, batch_idx):  # optimizer_idx
-        decoder_opt = self.optimizers()
-        decoder_opt.zero_grad()
+        encoder_opt, decoder_opt = self.optimizers()
+
+        if self.train_encoder:
+            encoder_opt.zero_grad()
+        if self.train_decoder:
+            decoder_opt.zero_grad()
 
         img, cap, allcaps, caplens = batch
 
@@ -54,7 +63,11 @@ class LightningModule(pl.LightningModule):
         loss += alpha_c * ((1. - alphas.sum(dim=1)) ** 2).mean()
 
         self.manual_backward(loss)
-        decoder_opt.step()
+
+        if self.train_encoder:
+            encoder_opt.step()
+        if self.train_decoder:
+            decoder_opt.step()
 
         return {
             'loss': loss,
@@ -130,12 +143,31 @@ class LightningModule(pl.LightningModule):
             torch.tensor(caplens, device=self.device)
 
     def configure_optimizers(self):
-        # encoder_optimizer = torch.optim.AdamW(
-        #     params=self.model.encoder.parameters(),
-        #     lr=1e-4,
-        # )
+        encoder_optimizer = torch.optim.AdamW(
+            params=self.model.encoder.parameters(),
+            lr=1e-4,
+        )
         decoder_optimizer = torch.optim.AdamW(
             params=self.model.decoder.parameters(),
             lr=4e-4,
         )
-        return [decoder_optimizer]
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer=decoder_optimizer, factor=0.5, patience=2
+        )
+
+        lr_scheduler = {
+            'scheduler': scheduler,
+            'interval': 'epoch',
+            'frequency': 1,
+            'monitor': 'val_loss'
+        },
+
+        return ({
+            'optimizer': encoder_optimizer,
+            'lr_scheduler': lr_scheduler,
+        }, {
+            'optimizer': decoder_optimizer,
+            'lr_scheduler': lr_scheduler,
+        })
+
+        # return [decoder_optimizer]

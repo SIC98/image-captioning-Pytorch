@@ -21,7 +21,9 @@ model = EncoderDecoder(
     dropout=0.5
 )
 
-lightningmodule = LightningModule(model=model)
+lightningmodule = LightningModule(
+    model=model, train_encoder=False, train_decoder=True
+)
 
 datamodule = COCODataModule()
 
