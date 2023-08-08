@@ -1,4 +1,6 @@
+from typing import Any, Optional
 import pytorch_lightning as pl
+from pytorch_lightning.utilities.types import LRSchedulerTypeUnion
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -151,23 +153,19 @@ class LightningModule(pl.LightningModule):
             params=self.model.decoder.parameters(),
             lr=4e-4,
         )
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        encoder_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer=encoder_optimizer, factor=0.5, patience=2
+        )
+        decoder_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer=decoder_optimizer, factor=0.5, patience=2
         )
 
-        lr_scheduler = {
-            'scheduler': scheduler,
-            'interval': 'epoch',
-            'frequency': 1,
-            'monitor': 'val_loss'
-        },
+        return [encoder_optimizer, decoder_optimizer], [encoder_scheduler, decoder_scheduler]
 
-        return ({
-            'optimizer': encoder_optimizer,
-            'lr_scheduler': lr_scheduler,
-        }, {
-            'optimizer': decoder_optimizer,
-            'lr_scheduler': lr_scheduler,
-        })
+    def on_validation_epoch_end(self):
+        encoder_sch, decoder_sch = self.lr_schedulers()
 
-        # return [decoder_optimizer]
+        if self.train_encoder:
+            encoder_sch.step(self.trainer.callback_metrics['valid_loss'])
+        if self.train_decoder:
+            decoder_sch.step(self.trainer.callback_metrics['valid_loss'])
