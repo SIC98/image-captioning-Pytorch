@@ -154,10 +154,10 @@ class LightningModule(pl.LightningModule):
             lr=4e-4,
         )
         encoder_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer=encoder_optimizer, factor=0.5, patience=2
+            optimizer=encoder_optimizer, factor=0.5, patience=1
         )
         decoder_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer=decoder_optimizer, factor=0.5, patience=2
+            optimizer=decoder_optimizer, factor=0.5, patience=1
         )
 
         return [encoder_optimizer, decoder_optimizer], [encoder_scheduler, decoder_scheduler]
