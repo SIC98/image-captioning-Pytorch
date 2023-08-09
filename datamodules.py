@@ -10,8 +10,8 @@ from utils import collate_fn
 class COCODataModule(LightningDataModule):
     def __init__(self):
         super().__init__()
-        self.train_batch_size = 32
-        self.valid_batch_size = 32
+        self.train_batch_size = 128
+        self.valid_batch_size = 100
         self.num_workers = 4
 
         transform = transforms.Compose([
