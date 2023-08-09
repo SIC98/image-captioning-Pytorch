@@ -22,7 +22,7 @@ model = EncoderDecoder(
 )
 
 lightningmodule = LightningModule(
-    model=model, train_encoder=False, train_decoder=True
+    model=model, train_encoder=True, train_decoder=True
 )
 
 datamodule = COCODataModule()
