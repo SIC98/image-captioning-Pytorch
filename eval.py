@@ -27,8 +27,11 @@ model = EncoderDecoder(
 checkpoint = torch.load(
     # './wandb/run-20230807_111626-bojfhtqv/files/epoch=6-step=181076.ckpt'  # batch 32
     # './wandb/run-20230808_120520-8c1pkwmx/files/epoch=7-step=25864.ckpt'
-    './wandb/run-20230809_002808-d1uch3pr/files/epoch=6-step=181076.ckpt'  # batch 128 two step
+    # './wandb/run-20230809_002808-d1uch3pr/files/epoch=6-step=181076.ckpt'  # batch 128 two step
     # './wandb/run-20230809_085650-0bzn5vdv/files/epoch=5-step=38796.ckpt' # batch 128
+
+    # batch 128 with same lr 1e-4
+    './wandb/run-20230810_101940-cvc6hkvw/files/epoch=10-step=71126.ckpt'
 )
 
 new_state_dict = OrderedDict()
@@ -77,8 +80,8 @@ def evaluate(beam_size):
 
     dataset = CaptionDataset(
         root='coco2014/val2014',
-        annFile='coco2014/caption_datasets/captions_val2014.json',
-        # annFile='coco2014/caption_datasets/captions_test2014.json',
+        # annFile='coco2014/caption_datasets/captions_val2014.json',
+        annFile='coco2014/caption_datasets/captions_test2014.json',
         transform=transform,
         cpi=5
     )
