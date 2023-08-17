@@ -35,9 +35,6 @@ class COCODataModule(LightningDataModule):
             cpi=5
         )
 
-    def setup(self, stage=None):
-        pass
-
     def train_dataloader(self):
 
         return DataLoader(
