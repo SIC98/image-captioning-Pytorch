@@ -35,3 +35,16 @@ class CaptionDataset(Dataset):
 
     def __len__(self):
         return self.dataset_size
+
+
+class CocoCaptionsWithIds(datasets.CocoCaptions):
+
+    def __getitem__(self, index: int):
+        id = self.ids[index]
+        image = self._load_image(id)
+        target = self._load_target(id)
+
+        if self.transforms is not None:
+            image, target = self.transforms(image, target)
+
+        return id, image, target
