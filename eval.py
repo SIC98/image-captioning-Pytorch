@@ -16,8 +16,8 @@ from models.models import EncoderDecoder
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-gpt2 = GPT2Model.from_pretrained('gpt2')
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+gpt2 = GPT2Model.from_pretrained("gpt2")
 
 vocab_size = tokenizer.vocab_size
 
@@ -31,12 +31,12 @@ model = EncoderDecoder(
 )
 
 checkpoint = torch.load(
-    # './wandb/run-20230806_204310-f9kfg7rl/files/epoch=6-step=258748.ckpt'
-    './wandb/run-20230808_161429-j2vkpuhj/files/epoch=7-step=73920.ckpt' # 128 batch size
+    # "./wandb/run-20230806_204310-f9kfg7rl/files/epoch=6-step=258748.ckpt"
+    "./wandb/run-20230808_161429-j2vkpuhj/files/epoch=7-step=73920.ckpt"  # 128 batch size
 )
 
 new_state_dict = OrderedDict()
-for n, v in checkpoint['state_dict'].items():
+for n, v in checkpoint["state_dict"].items():
     name = n.replace("model.", "")
     new_state_dict[name] = v
 
@@ -68,8 +68,8 @@ def evaluate(beam_size):
     ])
 
     dataset = CaptionDataset(
-        root='coco2017/val2017',
-        annFile='coco2017/annotations/captions_val2017.json',
+        root="coco2017/val2017",
+        annFile="coco2017/annotations/captions_val2017.json",
         transform=transform,
         cpi=5
     )
@@ -231,6 +231,6 @@ def evaluate(beam_size):
     return bleu4
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     beam_size = 5
     print(f"BLEU-4 score @ beam size of {beam_size} is {evaluate(beam_size)}")

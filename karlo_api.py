@@ -5,21 +5,21 @@ import urllib
 from PIL import Image
 
 # [내 애플리케이션] > [앱 키] 에서 확인한 REST API 키 값 입력
-REST_API_KEY = 'c53a3bd9609b7a2dabc7d1a95083248f'
+REST_API_KEY = "c53a3bd9609b7a2dabc7d1a95083248f"
 
 # 이미지 생성하기 요청
 
 
 def t2i(prompt, negative_prompt):
     r = requests.post(
-        'https://api.kakaobrain.com/v2/inference/karlo/t2i',
+        "https://api.kakaobrain.com/v2/inference/karlo/t2i",
         json={
-            'prompt': prompt,
-            'negative_prompt': negative_prompt
+            "prompt": prompt,
+            "negative_prompt": negative_prompt
         },
         headers={
-            'Authorization': f'KakaoAK {REST_API_KEY}',
-            'Content-Type': 'application/json'
+            "Authorization": f"KakaoAK {REST_API_KEY}",
+            "Content-Type": "application/json"
         }
     )
     # 응답 JSON 형식으로 변환

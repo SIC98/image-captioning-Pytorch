@@ -15,8 +15,8 @@ class OutputLogger(pl.Callback):
         batch_idx: int,
     ) -> None:
         pl_module.log(
-            'train_loss',
-            outputs['loss'],
+            "train_loss",
+            outputs["loss"],
             prog_bar=True
         )
 
@@ -39,9 +39,9 @@ class OutputLogger(pl.Callback):
         dataloader_idx: int = 0,
     ) -> None:
         trainer.current_epoch
-        self.valid_loss.append(outputs['loss'])
-        self.references.extend(outputs['references'])
-        self.hypotheses.extend(outputs['hypotheses'])
+        self.valid_loss.append(outputs["loss"])
+        self.references.extend(outputs["references"])
+        self.hypotheses.extend(outputs["hypotheses"])
 
     def on_validation_epoch_end(
         self,
@@ -50,8 +50,8 @@ class OutputLogger(pl.Callback):
     ) -> None:
         bleu4 = corpus_bleu(self.references, self.hypotheses)
 
-        pl_module.log('Bleu4', float(bleu4))
+        pl_module.log("Bleu4", float(bleu4))
         pl_module.log(
-            'valid_loss',
+            "valid_loss",
             sum(self.valid_loss) / len(self.valid_loss)
         )

@@ -63,21 +63,21 @@ def caption_image_beam_search(encoder, decoder, image_path, tokenizer, beam_size
     encoder_out = encoder_out.view(1, -1, encoder_dim)
     num_pixels = encoder_out.size(1)
 
-    # We'll treat the problem as having a batch size of k
+    # We"ll treat the problem as having a batch size of k
     # (k, num_pixels, encoder_dim)
     encoder_out = encoder_out.expand(k, num_pixels, encoder_dim)
 
-    # Tensor to store top k previous words at each step; now they're just <start>
+    # Tensor to store top k previous words at each step; now they"re just <start>
     k_prev_words = torch.LongTensor(
         [[50256]] * k).to(device)  # (k, 1)
 
-    # Tensor to store top k sequences; now they're just <start>
+    # Tensor to store top k sequences; now they"re just <start>
     seqs = k_prev_words  # (k, 1)
 
-    # Tensor to store top k sequences' scores; now they're just 0
+    # Tensor to store top k sequences" scores; now they"re just 0
     top_k_scores = torch.zeros(k, 1).to(device)  # (k, 1)
 
-    # Tensor to store top k sequences' alphas; now they're just 1s
+    # Tensor to store top k sequences" alphas; now they"re just 1s
     seqs_alpha = torch.ones(k, 1, enc_image_size, enc_image_size).to(
         device)  # (k, 1, enc_image_size, enc_image_size)
 
@@ -169,10 +169,10 @@ def caption_image_beam_search(encoder, decoder, image_path, tokenizer, beam_size
     return seq, alphas
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-    gpt2 = GPT2Model.from_pretrained('gpt2')
+    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+    gpt2 = GPT2Model.from_pretrained("gpt2")
 
     model = EncoderDecoder(
         attention_dim=512,
@@ -184,12 +184,12 @@ if __name__ == '__main__':
     )
 
     checkpoint = torch.load(
-        './wandb/run-20230802_030029-1y02hjfd/files/epoch=20-step=155232.ckpt'
+        "./wandb/run-20230802_030029-1y02hjfd/files/epoch=20-step=155232.ckpt"
     )
-    # 'wandb/run-20230731_234903-3pag4o5x/files/epoch=3-step=29568.ckpt': Old model
+    # "wandb/run-20230731_234903-3pag4o5x/files/epoch=3-step=29568.ckpt": Old model
 
     new_state_dict = OrderedDict()
-    for n, v in checkpoint['state_dict'].items():
+    for n, v in checkpoint["state_dict"].items():
         name = n.replace("model.", "")
         new_state_dict[name] = v
 
@@ -202,15 +202,15 @@ if __name__ == '__main__':
     encoder = model.encoder
 
     parser = argparse.ArgumentParser(
-        description='Show, Attend, and Tell - Tutorial - Generate Caption')
+        description="Show, Attend, and Tell - Tutorial - Generate Caption")
 
     parser.add_argument(
-        '--img', '-i', default='images/51232785.jpeg', help='path to image')
-    # parser.add_argument('--model', '-m', help='path to model')
-    parser.add_argument('--beam_size', '-b', default=5,
-                        type=int, help='beam size for beam search')
-    parser.add_argument('--dont_smooth', dest='smooth',
-                        action='store_false', help='do not smooth alpha overlay')
+        "--img", "-i", default="images/51232785.jpeg", help="path to image")
+    # parser.add_argument("--model", "-m", help="path to model")
+    parser.add_argument("--beam_size", "-b", default=5,
+                        type=int, help="beam size for beam search")
+    parser.add_argument("--dont_smooth", dest="smooth",
+                        action="store_false", help="do not smooth alpha overlay")
 
     args = parser.parse_args()
 

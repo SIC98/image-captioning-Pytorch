@@ -10,7 +10,7 @@ import random
 
 from utils import encode_texts, encode_texts_2d
 
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 
 
 class LightningModule(pl.LightningModule):
@@ -59,7 +59,7 @@ class LightningModule(pl.LightningModule):
         decoder_opt.step()
 
         return {
-            'loss': loss,
+            "loss": loss,
         }
 
     def validation_step(self, batch, batch_idx):
@@ -96,6 +96,11 @@ class LightningModule(pl.LightningModule):
             img_captions = [tokenizer.decode(
                 [token for token in img_cap if token != 50256]) for img_cap in img_caps
             ]
+
+            img_captions = [
+                not_empty_str for not_empty_str in img_captions if not_empty_str != []
+            ]
+
             img_captions = [img_caption.split()
                             for img_caption in img_captions]
             references.append(img_captions)
@@ -114,9 +119,9 @@ class LightningModule(pl.LightningModule):
         assert len(references) == len(hypotheses)
 
         return {
-            'loss': loss,
-            'references': references,
-            'hypotheses': hypotheses
+            "loss": loss,
+            "references": references,
+            "hypotheses": hypotheses
         }
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
