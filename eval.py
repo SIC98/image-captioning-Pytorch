@@ -6,13 +6,13 @@ from nltk.translate.bleu_score import corpus_bleu
 import torch.nn.functional as F
 from tqdm import tqdm
 from collections import OrderedDict
-from torchvision import datasets, transforms
+from torchvision import transforms
 from torch.utils.data import DataLoader
 from transformers import GPT2Model, GPT2Tokenizer
 from cocodatasets import CaptionDataset
-import json
 
 from models.models import EncoderDecoder
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

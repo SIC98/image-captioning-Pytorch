@@ -1,19 +1,11 @@
 
-from collections import OrderedDict
-from PIL import Image
-
-from skimage import io
-from skimage.transform import resize
 from transformers import GPT2Model, GPT2Tokenizer
-
-import argparse
-import matplotlib.cm as cm
-import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
-import json
-import numpy as np
 import torch.nn.functional as F
 import torch
+from collections import OrderedDict
+from PIL import Image
+import argparse
 
 from models.models import EncoderDecoder
 
