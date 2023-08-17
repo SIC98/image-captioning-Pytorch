@@ -55,7 +55,7 @@ def collate_fn(samples):
     padded_captions = []
     for c in captions:
         if len(c) < max_length:
-            c += [''] * (max_length - len(c))
+            c += [""] * (max_length - len(c))
         padded_captions.append(c)
 
     return images, padded_captions

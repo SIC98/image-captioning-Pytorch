@@ -13,8 +13,8 @@ import wandb
 
 pl.seed_everything(42)
 
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-gpt2 = GPT2Model.from_pretrained('gpt2')
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+gpt2 = GPT2Model.from_pretrained("gpt2")
 
 model = EncoderDecoder(
     attention_dim=512,
@@ -33,19 +33,19 @@ lightningmodule = LightningModule(model=model)
 datamodule = COCODataModule()
 
 trainer = pl.Trainer(
-    accelerator='gpu',
+    accelerator="gpu",
     devices=-1,
     logger=[
-        WandbLogger(project='Image Captioning'),
+        WandbLogger(project="Image Captioning"),
     ],
     callbacks=[
         ModelCheckpoint(
-            monitor='valid_loss',
+            monitor="valid_loss",
             dirpath=wandb.run.dir,
             save_top_k=1,
         ),
-        LearningRateMonitor(logging_interval='step'),
-        EarlyStopping(monitor='valid_loss', mode='min', patience=3),
+        LearningRateMonitor(logging_interval="step"),
+        EarlyStopping(monitor="valid_loss", mode="min", patience=3),
         OutputLogger(),
     ],
     max_epochs=-1,

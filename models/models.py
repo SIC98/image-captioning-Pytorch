@@ -263,7 +263,7 @@ if __name__ == "__main__":
     from PIL import Image
     import requests
 
-    url = 'https://huggingface.co/datasets/sayakpaul/sample-datasets/resolve/main/pokemon.png'
+    url = "https://huggingface.co/datasets/sayakpaul/sample-datasets/resolve/main/pokemon.png"
     image = Image.open(requests.get(url, stream=True).raw)
     image
 

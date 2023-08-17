@@ -10,7 +10,7 @@ import random
 
 from utils import encode_texts, encode_texts_2d
 
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 
 
 class LightningModule(pl.LightningModule):
@@ -59,7 +59,7 @@ class LightningModule(pl.LightningModule):
         decoder_opt.step()
 
         return {
-            'loss': loss,
+            "loss": loss,
         }
 
     def validation_step(self, batch, batch_idx):
@@ -93,22 +93,16 @@ class LightningModule(pl.LightningModule):
         allcaps = allcaps[sort_ind]
         for j in range(allcaps.shape[0]):
             img_caps = allcaps[j].tolist()
-<<<<<<< HEAD
-            img_captions = list(
-                map(lambda c: [w for w in c if w not in {self.word_map['<start>'], self.word_map['<pad>']}],
-                    img_caps))  # remove <start> and pads
-
-            # Remove empty reference
-            img_captions = [
-                not_empty_str for not_empty_str in img_captions if not_empty_str != [self.word_map['<end>']]
-            ]
-=======
             img_captions = [tokenizer.decode(
                 [token for token in img_cap if token != 50256]) for img_cap in img_caps
             ]
+
+            img_captions = [
+                not_empty_str for not_empty_str in img_captions if not_empty_str != []
+            ]
+
             img_captions = [img_caption.split()
                             for img_caption in img_captions]
->>>>>>> 752672a (Train with gpt2 tokenizer)
             references.append(img_captions)
 
         # Hypotheses
@@ -125,23 +119,18 @@ class LightningModule(pl.LightningModule):
         assert len(references) == len(hypotheses)
 
         return {
-            'loss': loss,
-            'references': references,
-            'hypotheses': hypotheses
+            "loss": loss,
+            "references": references,
+            "hypotheses": hypotheses
         }
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
         img, caption, allcaps = batch
 
-<<<<<<< HEAD
-        tokenized_cap, caplens = encode_texts(caption, self.word_map)
-        tokenized_allcaps = encode_texts_2d(allcaps, self.word_map)
-=======
         cap = [c[0] for c in allcaps]
 
         tokenized_cap, caplens = encode_texts(cap, tokenizer)
         tokenized_allcaps = encode_texts_2d(allcaps, tokenizer)
->>>>>>> 752672a (Train with gpt2 tokenizer)
 
         return img, \
             torch.tensor(tokenized_cap, device=self.device), \
