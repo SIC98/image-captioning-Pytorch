@@ -28,7 +28,9 @@ model = EncoderDecoder(
 model.decoder.load_pretrained_embeddings(weight=gpt2.wte.weight, freeze=True)
 # del gpt2
 
-lightningmodule = LightningModule(model=model)
+lightningmodule = LightningModule(
+    model=model, train_encoder=True, train_decoder=True
+)
 
 datamodule = COCODataModule()
 

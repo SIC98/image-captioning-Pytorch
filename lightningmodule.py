@@ -16,7 +16,9 @@ tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 class LightningModule(pl.LightningModule):
     def __init__(
         self,
-        model: nn.Module
+        model: nn.Module,
+        train_encoder: bool,
+        train_decoder: bool
     ):
         super().__init__()
         self.model = model
@@ -25,10 +27,16 @@ class LightningModule(pl.LightningModule):
 
         self.loss = nn.CrossEntropyLoss()
 
+        self.train_encoder = train_encoder
+        self.train_decoder = train_decoder
+
     def training_step(self, batch, batch_idx):  # optimizer_idx
         encoder_opt, decoder_opt = self.optimizers()
-        encoder_opt.zero_grad()
-        decoder_opt.zero_grad()
+
+        if self.train_encoder:
+            encoder_opt.zero_grad()
+        if self.train_decoder:
+            decoder_opt.zero_grad()
 
         img, cap, allcaps, caplens = batch
 
@@ -55,8 +63,10 @@ class LightningModule(pl.LightningModule):
         loss += alpha_c * ((1. - alphas.sum(dim=1)) ** 2).mean()
 
         self.manual_backward(loss)
-        encoder_opt.step()
-        decoder_opt.step()
+        if self.train_encoder:
+            encoder_opt.step()
+        if self.train_decoder:
+            decoder_opt.step()
 
         return {
             "loss": loss,
