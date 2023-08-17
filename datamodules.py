@@ -1,10 +1,8 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
-import json
+from torchvision import transforms
 
 from cocodatasets import CaptionDataset
-from utils import collate_fn
 
 
 class COCODataModule(LightningDataModule):
@@ -47,8 +45,7 @@ class COCODataModule(LightningDataModule):
             batch_size=self.train_batch_size,
             drop_last=True,
             num_workers=self.num_workers,
-            shuffle=True,
-            # collate_fn=collate_fn
+            shuffle=True
         )
 
     def val_dataloader(self):
@@ -57,8 +54,7 @@ class COCODataModule(LightningDataModule):
             batch_size=self.valid_batch_size,
             drop_last=False,
             num_workers=self.num_workers,
-            shuffle=False,
-            # collate_fn=collate_fn
+            shuffle=False
         )
 
 
