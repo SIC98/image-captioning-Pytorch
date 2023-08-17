@@ -163,6 +163,19 @@ def caption_image_beam_search(encoder, decoder, image_path, tokenizer, beam_size
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser(
+        description="Show, Attend, and Tell - Tutorial - Generate Caption")
+
+    parser.add_argument(
+        "--img", "-i", default="images/51232785.jpeg", help="path to image")
+    parser.add_argument("--model", "-m", help="path to model")
+    parser.add_argument("--beam_size", "-b", default=5,
+                        type=int, help="beam size for beam search")
+    parser.add_argument("--dont_smooth", dest="smooth",
+                        action="store_false", help="do not smooth alpha overlay")
+
+    args = parser.parse_args()
+
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
     gpt2 = GPT2Model.from_pretrained("gpt2")
 
@@ -175,10 +188,7 @@ if __name__ == "__main__":
         dropout=0.5
     )
 
-    checkpoint = torch.load(
-        "./wandb/run-20230802_030029-1y02hjfd/files/epoch=20-step=155232.ckpt"
-    )
-    # "wandb/run-20230731_234903-3pag4o5x/files/epoch=3-step=29568.ckpt": Old model
+    checkpoint = torch.load(args.model)
 
     new_state_dict = OrderedDict()
     for n, v in checkpoint["state_dict"].items():
@@ -192,19 +202,6 @@ if __name__ == "__main__":
 
     decoder = model.decoder
     encoder = model.encoder
-
-    parser = argparse.ArgumentParser(
-        description="Show, Attend, and Tell - Tutorial - Generate Caption")
-
-    parser.add_argument(
-        "--img", "-i", default="images/51232785.jpeg", help="path to image")
-    # parser.add_argument("--model", "-m", help="path to model")
-    parser.add_argument("--beam_size", "-b", default=5,
-                        type=int, help="beam size for beam search")
-    parser.add_argument("--dont_smooth", dest="smooth",
-                        action="store_false", help="do not smooth alpha overlay")
-
-    args = parser.parse_args()
 
     # # Encode, decode with attention and beam search
     seq, alphas = caption_image_beam_search(
