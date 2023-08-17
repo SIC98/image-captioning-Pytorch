@@ -144,4 +144,19 @@ class LightningModule(pl.LightningModule):
             params=self.model.decoder.parameters(),
             lr=4e-4,
         )
-        return [encoder_optimizer, decoder_optimizer]
+        encoder_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer=encoder_optimizer, factor=0.5, patience=1
+        )
+        decoder_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer=decoder_optimizer, factor=0.5, patience=1
+        )
+
+        return [encoder_optimizer, decoder_optimizer], [encoder_scheduler, decoder_scheduler]
+
+    def on_validation_epoch_end(self):
+        encoder_sch, decoder_sch = self.lr_schedulers()
+
+        if self.train_encoder:
+            encoder_sch.step(self.trainer.callback_metrics['valid_loss'])
+        if self.train_decoder:
+            decoder_sch.step(self.trainer.callback_metrics['valid_loss'])
