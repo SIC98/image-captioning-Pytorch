@@ -1,12 +1,8 @@
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence
-from nltk.translate.bleu_score import corpus_bleu
 from transformers import GPT2Tokenizer
-import wandb
-import random
 
 from utils import encode_texts, encode_texts_2d
 
